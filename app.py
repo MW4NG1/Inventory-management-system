@@ -35,12 +35,12 @@ inventory_db = [
 def find_item(item_id):
     return next((item for item in inventory_db if item["id"] == item_id), None)
 
-# Fetches All items
+
 @app.route('/inventory', methods=['GET'])
 def get_inventory():
     return jsonify(inventory_db), 200
 
-# Fetches single item by ID
+
 @app.route('/inventory/<int:item_id>', methods=['GET'])
 def get_single_item(item_id):
     item = find_item(item_id)
@@ -48,7 +48,7 @@ def get_single_item(item_id):
         return jsonify({"error": "Item not found"}), 404
     return jsonify(item), 200
 
-# Adds new item to the inventory
+
 @app.route('/inventory', methods=['POST'])
 def add_item():
     data = request.get_json()
@@ -71,3 +71,21 @@ def add_item():
     
     inventory_db.append(new_entry)
     return jsonify(new_entry), 201
+
+
+@app.route('/inventory/<int:item_id>', methods=['PATCH'])
+def update_item(item_id):
+    item = find_item(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+        
+    data = request.get_json()
+    if not data or 'product' not in data:
+        return jsonify({"error": "Invalid payload"}), 400
+        
+    prod_data = data['product']
+    for key, value in prod_data.items():
+        if key in item["product"]:
+            item["product"][key] = value
+            
+    return jsonify(item), 200
