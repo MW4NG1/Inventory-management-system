@@ -30,3 +30,7 @@ inventory_db = [
         }
     }
 ]
+
+# Helper function
+def find_item(item_id):
+    return next((item for item in inventory_db if item["id"] == item_id), None)
