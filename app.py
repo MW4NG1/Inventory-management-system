@@ -35,6 +35,15 @@ inventory_db = [
 def find_item(item_id):
     return next((item for item in inventory_db if item["id"] == item_id), None)
 
+# Fetches All items
 @app.route('/inventory', methods=['GET'])
 def get_inventory():
     return jsonify(inventory_db), 200
+
+# Fetches a single item by ID
+@app.route('/inventory/<int:item_id>', methods=['GET'])
+def get_single_item(item_id):
+    item = find_item(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+    return jsonify(item), 200
