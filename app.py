@@ -40,10 +40,34 @@ def find_item(item_id):
 def get_inventory():
     return jsonify(inventory_db), 200
 
-# Fetches a single item by ID
+# Fetches single item by ID
 @app.route('/inventory/<int:item_id>', methods=['GET'])
 def get_single_item(item_id):
     item = find_item(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
     return jsonify(item), 200
+
+# Adds new item to the inventory
+@app.route('/inventory', methods=['POST'])
+def add_item():
+    data = request.get_json()
+    if not data or 'product' not in data:
+        return jsonify({"error": "Invalid payload, 'product' data required"}), 400
+    
+    new_id = max([item["id"] for item in inventory_db], default=0) + 1
+    new_entry = {
+        "id": new_id,
+        "status": 1,
+        "product": {
+            "product_name": data['product'].get('product_name', 'Unknown'),
+            "brands": data['product'].get('brands', 'Unknown'),
+            "ingredients_text": data['product'].get('ingredients_text', ''),
+            "quantity": data['product'].get('quantity', '1 unit'),
+            "price": float(data['product'].get('price', 0.0)),
+            "barcode": data['product'].get('barcode', '')
+        }
+    }
+    
+    inventory_db.append(new_entry)
+    return jsonify(new_entry), 201
