@@ -33,3 +33,14 @@ def test_get_inventory(client):
     data = response.get_json()
     assert isinstance(data, list)
     assert len(data) == 1
+
+def test_get_single_item(client):
+    reset_db()
+    response = client.get('/inventory/1')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['id'] == 1
+    assert data['product']['product_name'] == "Organic Almond Milk"
+
+    response_404 = client.get('/inventory/999')
+    assert response_404.status_code == 404
