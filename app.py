@@ -49,23 +49,48 @@ def get_single_item(item_id):
     return jsonify(item), 200
 
 
-@app.route('/inventory', methods=['POST'])
-def add_item():
+@app.route('/inventory/fetch-external', methods=['POST'])
+def fetch_external_product():
     data = request.get_json()
-    if not data or 'product' not in data:
-        return jsonify({"error": "Invalid payload, 'product' data required"}), 400
+    if not data:
+        return jsonify({"error": "Invalid payload"}), 400
+        
+    barcode = data.get('barcode')
+    product_name = data.get('product_name')
+
+    prod_info = {}
     
+    if barcode:
+        external_url = f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json"
+        response = requests.get(external_url)
+        if response.status_code == 200:
+            api_data = response.json()
+            if api_data.get("status") == 1:
+                prod_info = api_data.get("product", {})
+                
+    elif product_name:
+        search_url = f"https://world.openfoodfacts.org/cgi/search.pl?search_terms={product_name}&search_simple=1&action=process&json=1"
+        response = requests.get(search_url)
+        if response.status_code == 200:
+            api_data = response.json()
+            products = api_data.get("products", [])
+            if products:
+                prod_info = products[0] 
+                
+    if not prod_info:
+        return jsonify({"error": "Product not found on OpenFoodFacts using provided barcode or name"}), 404
+        
     new_id = max([item["id"] for item in inventory_db], default=0) + 1
     new_entry = {
         "id": new_id,
         "status": 1,
         "product": {
-            "product_name": data['product'].get('product_name', 'Unknown'),
-            "brands": data['product'].get('brands', 'Unknown'),
-            "ingredients_text": data['product'].get('ingredients_text', ''),
-            "quantity": data['product'].get('quantity', '1 unit'),
-            "price": float(data['product'].get('price', 0.0)),
-            "barcode": data['product'].get('barcode', '')
+            "product_name": prod_info.get("product_name", product_name or "Unknown Product"),
+            "brands": prod_info.get("brands", "Unknown Brand"),
+            "ingredients_text": prod_info.get("ingredients_text", "Not specified"),
+            "quantity": prod_info.get("quantity", "Standard"),
+            "price": 4.99,  # Default fallback price for imported inventory
+            "barcode": prod_info.get("code", barcode or "N/A")
         }
     }
     
