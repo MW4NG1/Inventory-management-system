@@ -89,3 +89,16 @@ def update_item(item_id):
             item["product"][key] = value
             
     return jsonify(item), 200
+
+@app.route('/inventory/<int:item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    global inventory_db
+    item = find_item(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+        
+    inventory_db = [i for i in inventory_db if i["id"] != item_id]
+    return jsonify({"message": f"Item {item_id} successfully deleted"}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
