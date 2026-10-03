@@ -25,3 +25,11 @@ def reset_db():
             }
         }
     ])
+
+def test_get_inventory(client):
+    reset_db()
+    response = client.get('/inventory')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 1
