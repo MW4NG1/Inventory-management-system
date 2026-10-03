@@ -51,7 +51,6 @@ def add_item():
             "barcode": barcode
         }
     }
-
     try:
         response = requests.post(BASE_URL, json=payload)
         if response.status_code == 201:
@@ -88,12 +87,32 @@ def update_item():
     else:
         print("[Error] Invalid selection.")
         return
-
     try:
         response = requests.patch(f"{BASE_URL}/{item_id}", json={"product": payload_product})
         if response.status_code == 200:
             print(f"\n[Success] Item {item_id} updated successfully!")
         else:
             print(f"\n[Error] {response.json().get('error', 'Failed to update')}")
+    except requests.exceptions.ConnectionError:
+        print("\n[Error] Could not connect to the Flask API.")
+
+
+def delete_item():
+    try:
+        item_id = int(input("Enter ID of the item to delete: ").strip())
+    except ValueError:
+        print("[Error] ID must be a valid integer.")
+        return
+
+    confirm = input(f"Are you sure you want to delete item {item_id}? (y/n): ").strip().lower()
+    if confirm != 'y':
+        print("Deletion cancelled.")
+        return
+    try:
+        response = requests.delete(f"{BASE_URL}/{item_id}")
+        if response.status_code == 200:
+            print(f"\n[Success] Item {item_id} deleted successfully!")
+        else:
+            print(f"\n[Error] {response.json().get('error', 'Item not found')}")
     except requests.exceptions.ConnectionError:
         print("\n[Error] Could not connect to the Flask API.")
