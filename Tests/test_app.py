@@ -77,6 +77,26 @@ def test_delete_item(client):
     response = client.delete('/inventory/1')
     assert response.status_code == 200
     
-    # Verify deletion
     response_get = client.get('/inventory/1')
     assert response_get.status_code == 404
+
+@patch('app.requests.get')
+def test_fetch_external_product(mock_get, client):
+    reset_db()
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {
+        "status": 1,
+        "product": {
+            "product_name": "Mocked Organic Oats",
+            "brands": "MockBrand",
+            "ingredients_text": "Oats",
+            "quantity": "500g",
+            "code": "123456789"
+        }
+    }
+    payload = {"barcode": "123456789"}
+    response = client.post('/inventory/fetch-external', json=payload)
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data['product']['product_name'] == "Mocked Organic Oats"
+    assert data['product']['brands'] == "MockBrand"
