@@ -28,3 +28,34 @@ def view_inventory():
             print(f"\n[Error] Failed to fetch inventory. Status code: {response.status_code}")
     except requests.exceptions.ConnectionError:
         print("\n[Error] Could not connect to the Flask API. Make sure app.py is running!")
+
+def add_item():
+    print("\n--- Add New Item ---")
+    name = input("Enter product name: ").strip()
+    brand = input("Enter brand: ").strip()
+    quantity = input("Enter quantity/size (e.g., 500g, 1L): ").strip()
+    try:
+        price = float(input("Enter price (e.g., 2.99): ").strip())
+    except ValueError:
+        print("[Error] Invalid price format. Must be a number.")
+        return
+    barcode = input("Enter barcode (optional): ").strip()
+
+    payload = {
+        "product": {
+            "product_name": name,
+            "brands": brand,
+            "quantity": quantity,
+            "price": price,
+            "barcode": barcode
+        }
+    }
+
+    try:
+        response = requests.post(BASE_URL, json=payload)
+        if response.status_code == 201:
+            print("\n[Success] Item added successfully!")
+        else:
+            print(f"\n[Error] Failed to add item: {response.json().get('error', 'Unknown error')}")
+    except requests.exceptions.ConnectionError:
+        print("\n[Error] Could not connect to the Flask API.")
