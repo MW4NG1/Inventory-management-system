@@ -71,3 +71,12 @@ def test_update_item(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data['product']['price'] == 4.50
+
+def test_delete_item(client):
+    reset_db()
+    response = client.delete('/inventory/1')
+    assert response.status_code == 200
+    
+    # Verify deletion
+    response_get = client.get('/inventory/1')
+    assert response_get.status_code == 404
