@@ -149,3 +149,27 @@ def fetch_external():
             print(f"\n[Error] {response.json().get('error', 'Product not found')}")
     except requests.exceptions.ConnectionError:
         print("\n[Error] Could not connect to the Flask API.")
+
+
+def main():
+    while True:
+        print_menu()
+        choice = input("\nChoose an option (1-6): ").strip()
+        if choice == '1':
+            view_inventory()
+        elif choice == '2':
+            add_item()
+        elif choice == '3':
+            update_item()
+        elif choice == '4':
+            delete_item()
+        elif choice == '5':
+            fetch_external()
+        elif choice == '6':
+            print("\nExiting CLI. Goodbye!")
+            sys.exit(0)
+        else:
+            print("\n[Error] Invalid choice. Please enter a number between 1 and 6.")
+
+if __name__ == "__main__":
+    main()
