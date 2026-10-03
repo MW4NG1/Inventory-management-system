@@ -44,3 +44,18 @@ def test_get_single_item(client):
 
     response_404 = client.get('/inventory/999')
     assert response_404.status_code == 404
+
+def test_add_item(client):
+    reset_db()
+    payload = {
+        "product": {
+            "product_name": "Test Coffee",
+            "brands": "Nescafe",
+            "price": 5.99,
+            "quantity": "200g"
+        }
+    }
+    response = client.post('/inventory', json=payload)
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data['product']['product_name'] == "Test Coffee"
