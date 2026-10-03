@@ -59,3 +59,15 @@ def test_add_item(client):
     assert response.status_code == 201
     data = response.get_json()
     assert data['product']['product_name'] == "Test Coffee"
+
+def test_update_item(client):
+    reset_db()
+    payload = {
+        "product": {
+            "price": 4.50
+        }
+    }
+    response = client.patch('/inventory/1', json=payload)
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['product']['price'] == 4.50
