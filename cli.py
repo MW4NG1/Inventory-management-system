@@ -116,3 +116,36 @@ def delete_item():
             print(f"\n[Error] {response.json().get('error', 'Item not found')}")
     except requests.exceptions.ConnectionError:
         print("\n[Error] Could not connect to the Flask API.")
+
+
+def fetch_external():
+    print("\n--- Fetch from OpenFoodFacts ---")
+    print("1. Search by Barcode")
+    print("2. Search by Product Name")
+    choice = input("Select option (1 or 2): ").strip()
+
+    payload = {}
+    if choice == '1':
+        barcode = input("Enter barcode: ").strip()
+        if not barcode:
+            print("[Error] Barcode cannot be empty.")
+            return
+        payload["barcode"] = barcode
+    elif choice == '2':
+        prod_name = input("Enter product name: ").strip()
+        if not prod_name:
+            print("[Error] Product name cannot be empty.")
+            return
+        payload["product_name"] = prod_name
+    else:
+        print("[Error] Invalid choice.")
+        return
+    try:
+        response = requests.post(f"{BASE_URL}/fetch-external", json=payload)
+        if response.status_code == 201:
+            data = response.json().get("product", {})
+            print(f"\n[Success] Fetched and saved: {data.get('product_name')} ({data.get('brands')})")
+        else:
+            print(f"\n[Error] {response.json().get('error', 'Product not found')}")
+    except requests.exceptions.ConnectionError:
+        print("\n[Error] Could not connect to the Flask API.")
