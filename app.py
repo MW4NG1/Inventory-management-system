@@ -35,10 +35,35 @@ inventory_db = [
 def find_item(item_id):
     return next((item for item in inventory_db if item["id"] == item_id), None)
 
-
-@app.route('/inventory', methods=['GET'])
-def get_inventory():
-    return jsonify(inventory_db), 200
+# GET all inventory items or POST a new inventory item manually
+@app.route('/inventory', methods=['GET', 'POST'])
+def handle_inventory():
+    if request.method == 'GET':
+        return jsonify(inventory_db), 200
+        
+    elif request.method == 'POST':
+        data = request.get_json()
+        if not data or 'product' not in data:
+            return jsonify({"error": "Invalid payload, 'product' key required"}), 400
+            
+        prod_data = data['product']
+        new_id = max([item["id"] for item in inventory_db], default=0) + 1
+        
+        new_entry = {
+            "id": new_id,
+            "status": 1,
+            "product": {
+                "product_name": prod_data.get('product_name', 'Unknown Product'),
+                "brands": prod_data.get('brands', 'Unknown Brand'),
+                "ingredients_text": prod_data.get('ingredients_text', 'Not specified'),
+                "quantity": prod_data.get('quantity', 'Standard'),
+                "price": float(prod_data.get('price', 0.0)),
+                "barcode": prod_data.get('barcode', 'N/A')
+            }
+        }
+        
+        inventory_db.append(new_entry)
+        return jsonify(new_entry), 201
 
 
 @app.route('/inventory/<int:item_id>', methods=['GET'])
@@ -57,7 +82,6 @@ def fetch_external_product():
         
     barcode = data.get('barcode')
     product_name = data.get('product_name')
-
     prod_info = {}
     
     if barcode:
@@ -107,12 +131,11 @@ def update_item(item_id):
     data = request.get_json()
     if not data or 'product' not in data:
         return jsonify({"error": "Invalid payload"}), 400
-        
+
     prod_data = data['product']
     for key, value in prod_data.items():
         if key in item["product"]:
             item["product"][key] = value
-            
     return jsonify(item), 200
 
 @app.route('/inventory/<int:item_id>', methods=['DELETE'])
