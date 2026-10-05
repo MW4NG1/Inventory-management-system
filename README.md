@@ -67,7 +67,7 @@ pipenv run python -m pytest -v
 
 
 ## Author
-Developed as part of the Python Flask REST API & Inventory Management Lab by Mwangi Michael.
+Developed as part of the Python Flask REST API and Inventory Management Lab by Mwangi Michael.
 
 
 
