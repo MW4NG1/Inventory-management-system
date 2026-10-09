@@ -3,7 +3,6 @@ import requests
 
 app = Flask(__name__)
 
-# Simulated database array reflecting OpenFoodFacts structure
 inventory_db = [
     {
         "id": 1,
