@@ -34,7 +34,6 @@ inventory_db = [
 def find_item(item_id):
     return next((item for item in inventory_db if item["id"] == item_id), None)
 
-# GET all inventory items or POST a new inventory item manually
 @app.route('/inventory', methods=['GET', 'POST'])
 def handle_inventory():
     if request.method == 'GET':
